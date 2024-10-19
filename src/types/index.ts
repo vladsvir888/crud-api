@@ -1,21 +1,12 @@
-export type Routes = {
-  "/api/users": {
-    GET: () => void;
-    PUT?: never;
-    DELETE?: never;
-    POST: () => void;
-  };
-  "/api/users/:userId": {
-    GET: () => void;
-    PUT: () => void;
-    DELETE: () => void;
-    POST?: never;
-  };
+import { ServerResponse } from "node:http";
+
+export type Route = {
+  [key: string]: () => void;
 };
 
-export type RouteUsers = Routes["/api/users"];
-
-export type RouteUserId = Routes["/api/users/:userId"];
+export type Routes = {
+  [key: string]: Route | undefined;
+};
 
 export type User = {
   id: string;
@@ -23,3 +14,12 @@ export type User = {
   age: number;
   hobbies: string[] | [];
 };
+
+export type ReturnTypeResponse = {
+  res: ServerResponse;
+  statusCode?: number;
+  contentType?: string;
+  data: unknown;
+};
+
+export type FunctionOrUndefined = (() => void) | undefined;

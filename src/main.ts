@@ -1,8 +1,9 @@
 import "dotenv/config";
 import { createServer } from "node:http";
 import { parse } from "node:url";
-import { Routes, RouteUsers, RouteUserId, User } from "./types";
+import { Routes, User, FunctionOrUndefined } from "./types";
 import { users } from "./database";
+import { response } from "./utils/response";
 
 class App {
   port: string;
@@ -11,27 +12,36 @@ class App {
 
   constructor() {
     this.port = process.env.PORT ?? "3000";
-    this.users = users; // mock db
+    this.users = users;
     this.routes = this.createRoutes();
     this.createServer();
   }
 
-  private getRoute(url?: string): RouteUsers | RouteUserId | null {
-    const regex = /\/api\/users\/*/;
+  private getHandler(url: string, method: string): FunctionOrUndefined {
     const { pathname } = parse(url ?? "", true);
+    let handler: FunctionOrUndefined;
 
-    if (!pathname || !regex.test(pathname)) {
-      return null;
+    if (!pathname) {
+      return handler;
     }
 
-    const pathnameElements = pathname.split("/").filter(Boolean);
-    const pathnameElementsNumber = pathnameElements.length;
+    handler = this.routes[pathname]?.[method];
 
-    if (pathnameElementsNumber === 2) {
-      return this.routes["/api/users"];
+    if (!handler) {
+      const dynamicRoutes = Object.keys(this.routes).filter((item) =>
+        item.includes("{param}")
+      );
+      const matchedDynamicRoute = dynamicRoutes.find((item) => {
+        const regex = new RegExp(`^${item.replace(/\{param\}/, "[^/]+")}$`);
+        return regex.test(pathname);
+      });
+
+      if (matchedDynamicRoute) {
+        handler = this.routes[matchedDynamicRoute]?.[method];
+      }
     }
 
-    return this.routes["/api/users/:userId"];
+    return handler;
   }
 
   private createRoutes(): Routes {
@@ -44,7 +54,7 @@ class App {
           console.log("Create record about new user");
         },
       },
-      "/api/users/:userId": {
+      "/api/users/{param}": {
         GET: () => {
           console.log("Get user by id");
         },
@@ -62,11 +72,30 @@ class App {
     const server = createServer();
 
     server.on("request", (req, res) => {
-      const { url, method } = req;
-      const route = this.getRoute(url);
+      try {
+        const { url, method } = req;
 
-      if (route && method && (method as keyof typeof route) in route) {
-        route[method as keyof typeof route]?.();
+        if (!url || !method) {
+          return;
+        }
+
+        const handler = this.getHandler(url, method);
+
+        if (handler) {
+          handler();
+        } else {
+          response({
+            res,
+            statusCode: 404,
+            data: "URL of your request doesn't exist",
+          });
+        }
+      } catch (error) {
+        response({
+          res,
+          statusCode: 500,
+          data: "Internal server error.",
+        });
       }
     });
 
