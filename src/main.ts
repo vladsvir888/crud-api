@@ -216,8 +216,9 @@ class App {
         return;
       }
 
-      this.users.push({ ...user, id: uuidv4() });
-      this.response({ res, statusCode: 201, data: user });
+      const newUser = { ...user, id: uuidv4() };
+      this.users.push(newUser);
+      this.response({ res, statusCode: 201, data: newUser });
     });
   }
 

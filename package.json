@@ -5,7 +5,7 @@
   "main": "main.ts",
   "scripts": {
     "start:dev": "nodemon --watch src --ext ts --exec ts-node src/main.ts",
-    "start:prod": "webpack"
+    "start:prod": "webpack && node dist/bundle.js"
   },
   "keywords": [],
   "author": "",
