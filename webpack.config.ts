@@ -2,7 +2,7 @@ import path from "path";
 
 export default {
   target: "node",
-  entry: "./src/main.ts",
+  entry: "./src/index.ts",
   output: {
     filename: "bundle.js",
     path: path.resolve(__dirname, "dist"),

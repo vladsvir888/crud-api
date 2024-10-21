@@ -1,6 +1,11 @@
 import "dotenv/config";
 import { v4 as uuidv4, validate as uuidValidate } from "uuid";
-import { createServer, ServerResponse, IncomingMessage } from "node:http";
+import {
+  createServer,
+  ServerResponse,
+  IncomingMessage,
+  Server,
+} from "node:http";
 import { parse } from "node:url";
 
 type Handler = (
@@ -17,8 +22,8 @@ type Routes = {
   [key: string]: Route;
 };
 
-type User = {
-  id: string;
+export type User = {
+  id?: string;
   username: string;
   age: number;
   hobbies: string[] | [];
@@ -36,18 +41,20 @@ type Validator = {
   user(user: User): boolean;
 };
 
-class App {
+export default class App {
   private port: string;
   private routes: Routes;
   private users: User[];
   private validator: Validator;
+  private server: Server;
 
   constructor() {
     this.port = process.env.PORT ?? "3000";
     this.users = [];
     this.validator = this.createValidator();
     this.routes = this.createRoutes();
-    this.createServer();
+    this.server = this.createServer();
+    this.startServer();
   }
 
   private createValidator(): Validator {
@@ -222,7 +229,7 @@ class App {
     });
   }
 
-  private getHandlerAndParam(
+  public getHandlerAndParam(
     url: string,
     method: string
   ): { handler: Handler | undefined; param: string | undefined } {
@@ -279,7 +286,7 @@ class App {
     };
   }
 
-  private createServer(): void {
+  public createServer(): Server {
     const server = createServer();
 
     server.on("request", (req, res) => {
@@ -310,10 +317,16 @@ class App {
       }
     });
 
-    server.listen(this.port, () =>
+    return server;
+  }
+
+  private startServer(): void {
+    this.server.listen(this.port, () =>
       console.log(`Server is running on port ${this.port}.`)
     );
   }
-}
 
-new App();
+  public closeServer(): void {
+    this.server.close();
+  }
+}
