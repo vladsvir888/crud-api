@@ -38,6 +38,12 @@ Run in production mode.
 npm run start:prod
 ```
 
+Run test.
+
+```bash
+npm run test
+```
+
 ## Endpoints
 
 | Method | Endpoint            | Description             |
