@@ -1,8 +1,11 @@
 import supertest from "supertest";
 import { validate as uuidValidate } from "uuid";
-import App, { User } from "./main";
+import { User } from "../db/userdb";
+import userRouter from "../routes/userRouter";
+import HTTPServer from "../server/server";
+import * as utils from "../utils/getHandlerAndParam";
 
-const app = new App();
+const app = new HTTPServer({ ...userRouter });
 const request = supertest(app.createServer());
 
 const validUser: User = {
@@ -72,7 +75,7 @@ describe("Tests", () => {
 
     it("should return 500 when errors on server side", async () => {
       const spy = jest
-        .spyOn(app, "getHandlerAndParam")
+        .spyOn(utils, "getHandlerAndParam")
         .mockImplementation(() => {
           throw new Error();
         });

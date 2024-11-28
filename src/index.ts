@@ -1,3 +1,4 @@
-import App from "./main";
+import HTTPServer from "./server/server";
+import userRouter from "./routes/userRouter";
 
-new App();
+new HTTPServer({ ...userRouter });
