@@ -4,7 +4,7 @@ This is a simple CRUD API server implemented in Node.js using the HTTP module.
 
 ## Technical requirements
 
-Use 22.x.x version (22.9.0 or upper) of Node.js.
+Use 22.x.x version (22.9.0 or upper) of Node.js
 
 ## Quick Start
 
